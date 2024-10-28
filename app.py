@@ -2,15 +2,18 @@ from dash import Dash, html, dcc
 import plotly.express as px
 import geopandas as gpd
 import dash_bootstrap_components as dbc
+import pandas as pd
 
-#Create and populate the map
-df = px.data.gapminder()
+#Keep this code for future animation
+'''df = px.data.gapminder()
 df = df[df['continent'] == 'Europe']
 #If we want latitude and longitude of points remove locations and write "lat=geo_df.geometry.y, lon=geo_df.geometry.x"
 fig = px.scatter_geo(df, locations="iso_alpha", color="continent", hover_name="country",
                animation_frame="year", projection="natural earth")
-
-fig.update_geos(scope = 'europe', resolution=50)
+'''
+df = pd.read_csv('monitoringSite.csv')
+fig = px.scatter_geo(df, lat="lat", lon="lon", hover_name="waterBodyName", projection="natural earth", color="specialisedZoneType")
+fig.update_geos(scope = 'europe', resolution=50, fitbounds="locations")
 fig.update_layout(height=500, margin={"r":0,"t":0,"l":0,"b":0})
 
 #Create the Dash app
