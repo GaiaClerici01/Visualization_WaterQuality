@@ -1,0 +1,4 @@
+pandas==2.2.3
+dash==2.18.1
+geopandas==1.0.1
+dash_bootstrap_components==1.6.0
