@@ -17,7 +17,7 @@ df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYea
 
 # Filter on year (cast to int) to limit file size for github
 df['phenomenonTimeReferenceYear'] = df['phenomenonTimeReferenceYear'].astype(int)
-df = df[df['phenomenonTimeReferenceYear']] == 2020
+df = df[df['phenomenonTimeReferenceYear'] >= 2020]
 
 # Output sliced file
 df.to_csv('pesticides.csv', index=False)
