@@ -4,7 +4,7 @@ import pandas as pd
 df = pd.read_csv('aggregateddata_pesticides_full.csv', delimiter= ";", on_bad_lines='skip', index_col=False)
 
 # Limit columns to process
-df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYear', 'resultMeanValue', 'resultNumberOfSamples', 'lon', 'lat', 'monitoringSiteStatusCode']]
+df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYear', 'resultMeanValue', 'resultNumberOfSamples', 'exceedanceQualityStandard', 'lon', 'lat', 'monitoringSiteStatusCode']]
 
 # Drop rows with missing values
 df = df.dropna()
@@ -13,7 +13,7 @@ df = df.dropna()
 df = df[df['monitoringSiteStatusCode'] == 'stable']
 
 # Remove unneeded filter columns
-df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYear', 'resultMeanValue', 'resultNumberOfSamples']]
+df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYear', 'resultMeanValue', 'resultNumberOfSamples','exceedanceQualityStandard']]
 
 # Filter on year (cast to int) to limit file size for github
 df['phenomenonTimeReferenceYear'] = df['phenomenonTimeReferenceYear'].astype(int)
