@@ -6,3 +6,12 @@ In terminal
     .venv/Scripts/activate
     pip install -r requirements.txt
 If a new package is needed, please add its name and version, found in pip show {package} to the requirements.txt file.
+
+## Data contents
+Pesticides
+- monitoringSiteIdentifier: Maps to ID of the site.
+- eeaIndicator: What is measured.
+- phenomenonTimeReferenceYear: Which year is the measurement from.
+- resultMeanValue: The mean value of the measured pesticide for the given year.
+- resultNumberOfSamples: How many samples were taken during the year (data quality).
+- exeedanceQualityStandard: Does the mean value exceed the standard for water quality, where 1 = exceedance.
