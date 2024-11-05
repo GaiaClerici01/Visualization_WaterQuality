@@ -1,4 +1,5 @@
 import pandas as pd
+from decimal import *
 
 # Intake raw file
 df = pd.read_csv('aggregateddata_pesticides_full.csv', delimiter= ";", on_bad_lines='skip', index_col=False)
@@ -18,6 +19,11 @@ df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYea
 # Filter on year (cast to int) to limit file size for github
 df['phenomenonTimeReferenceYear'] = df['phenomenonTimeReferenceYear'].astype(int)
 df = df[df['phenomenonTimeReferenceYear'] >= 2020]
+
+# Format scientific notation to decimal
+df['resultMeanValue'] = df['resultMeanValue'].round(6)
+df['resultNumberOfSamples'] = df['resultNumberOfSamples'].astype(int)
+df['exceedanceQualityStandard'] = df['exceedanceQualityStandard'].astype(int)
 
 # Output sliced file
 df.to_csv('pesticides.csv', index=False)
