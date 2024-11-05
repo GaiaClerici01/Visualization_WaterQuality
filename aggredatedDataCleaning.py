@@ -21,7 +21,7 @@ df['phenomenonTimeReferenceYear'] = df['phenomenonTimeReferenceYear'].astype(int
 df = df[df['phenomenonTimeReferenceYear'] >= 2020]
 
 # Format scientific notation to decimal
-df['resultMeanValue'] = df['resultMeanValue'].apply(Decimal)
+df['resultMeanValue'] = df['resultMeanValue'].round(6)
 df['resultNumberOfSamples'] = df['resultNumberOfSamples'].astype(int)
 
 # Output sliced file
