@@ -5,6 +5,9 @@ import geopandas as gpd
 import dash_bootstrap_components as dbc
 import pandas as pd
 
+# Ask Gareth: Animation with go? What do we do about outliers?
+
+
 #Keep this code for future animation
 '''df_geo = px.data.gapminder()
 df_geo = df_geo[df_geo['continent'] == 'Europe']

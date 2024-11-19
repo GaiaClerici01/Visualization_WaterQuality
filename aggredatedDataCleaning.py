@@ -16,13 +16,17 @@ df = df[df['monitoringSiteStatusCode'] == 'stable']
 # Remove unneeded filter columns
 df = df[['monitoringSiteIdentifier', 'eeaIndicator', 'phenomenonTimeReferenceYear', 'resultMeanValue', 'resultNumberOfSamples']]
 
-# Filter on year (cast to int) to limit file size for github
+# Format year (cast to int)
 df['phenomenonTimeReferenceYear'] = df['phenomenonTimeReferenceYear'].astype(int)
-df = df[df['phenomenonTimeReferenceYear'] >= 2020]
 
 # Format scientific notation to decimal
 df['resultMeanValue'] = df['resultMeanValue'].round(6)
 df['resultNumberOfSamples'] = df['resultNumberOfSamples'].astype(int)
 
-# Output sliced file
-df.to_csv('aggregateddata.csv', index=False)
+# Run through year range to create a .csv per year
+max_year = max(df['phenomenonTimeReferenceYear'])
+min_year = min(df['phenomenonTimeReferenceYear']) if min(df['phenomenonTimeReferenceYear']) > 2000 else 2000
+
+for year in range(min_year, max_year +1):
+    df_year = df[df['phenomenonTimeReferenceYear'] == year]
+    df_year.to_csv(f'aggregateddata{year}.csv', index=False)
