@@ -9,7 +9,11 @@ df_data22 = pd.read_csv('aggregateddata2022.csv')
 df_data22['year'] = 2022
 df_data21 = pd.read_csv('aggregateddata2021.csv')
 df_data21['year'] = 2021
-df_data = pd.concat([df_data21, df_data22])
+df_data20 = pd.read_csv('aggregateddata2020.csv')
+df_data20['year'] = 2020
+df_data19 = pd.read_csv('aggregateddata2019.csv')
+df_data19['year'] = 2019
+df_data = pd.concat([df_data19, df_data20, df_data21, df_data22])
 
 df_geo = pd.merge(df_sites, df_data, on='monitoringSiteIdentifier')
 
@@ -105,16 +109,17 @@ def update_map(selected_element):
             hovertemplate=hovertemplate
         ),
         go.Densitymapbox(
-            lat=filtered_data['lat'],
-            lon=filtered_data['lon'],
-            text=filtered_data['waterBodyName'],
-            z=filtered_data['resultMeanValue'],
+            lat=initial_data['lat'],
+            lon=initial_data['lon'],
+            z=initial_data['resultMeanValue'],
             radius=8,
-            opacity=1,  # Adjust opacity as needed
-            colorscale="matter",
+            opacity=0.7,
+            colorscale='matter',
             colorbar=dict(title="Sample value"),
             zmin=filtered_data['resultMeanValue'].min(),
             zmax=filtered_data['resultMeanValue'].max(),
+            text=initial_data['waterBodyName'],
+            name=f"Density {years[0]}",
             hovertemplate=hovertemplate
         )
     ]
@@ -135,6 +140,17 @@ def update_map(selected_element):
                         cmax=filtered_data['resultMeanValue'].max(),
                     ),
                     text=filtered_data[filtered_data['year'] == year]['waterBodyName']
+                ),
+                go.Densitymapbox(
+                    lat=filtered_data[filtered_data['year'] == year]['lat'],
+                    lon=filtered_data[filtered_data['year'] == year]['lon'],
+                    z=filtered_data[filtered_data['year'] == year]['resultMeanValue'],
+                    radius=8,
+                    opacity=1,
+                    colorscale='matter',
+                    zmin=filtered_data['resultMeanValue'].min(),
+                    zmax=filtered_data['resultMeanValue'].max(),
+                    text=filtered_data[filtered_data['year'] == year]['waterBodyName'],
                 )
             ],
             name=str(year)
@@ -212,6 +228,7 @@ def update_line_graph(selected_element):
     filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
     
     line_fig = go.Figure()
+    filtered_data = filtered_data.groupby('phenomenonTimeReferenceYear')['resultMeanValue'].mean().reset_index()
 
     line_fig.add_trace(go.Scatter(
         x=filtered_data['phenomenonTimeReferenceYear'],
