@@ -3,6 +3,12 @@ import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 import pandas as pd
 
+# TODO
+# implememt exagon map: https://plotly.com/python/hexbin-mapbox/
+# on click on am exagon a graph showing only the data regarding that exagon should appear (create a comparison between exagon)
+# graph should show all elememnts on click change the element shown in the map
+# LATER: try to do a layered map to see if there's a corlleation between industrial area and water quality bweing bad
+
 # Load data
 df_sites = pd.read_csv('monitoringSite.csv')
 df_data22 = pd.read_csv('aggregateddata2022.csv')
