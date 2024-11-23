@@ -116,8 +116,12 @@ def update_map(selected_element):
         color="resultMeanValue",
         agg_func=np.mean,
         color_continuous_scale="matter",
-        range_color=[global_min, global_max],
+        range_color=[global_min, 50],
         animation_frame="year",
+    )
+    fig.update_layout(
+        height=600,
+        margin={"r": 0, "t": 2, "l": 8, "b": 2}  # Remove extra margins
     )
     
     return fig
@@ -161,7 +165,7 @@ def update_line_graph(selected_element):
         y='resultMeanValue',
         color='phenomenonTimeReferenceYear',
         title="Annual distribution",
-        labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'}
+        labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'},
     )
 
     return box_fig
