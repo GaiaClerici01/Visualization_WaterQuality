@@ -10,17 +10,18 @@ import pandas as pd
 # implememt exagon map: https://plotly.com/python/hexbin-mapbox/
 # on click on am exagon a graph showing only the data regarding that exagon should appear (create a comparison between exagon)
 # graph should show all elememnts on click change the element shown in the map
+# IDEA: how can we show actual quality?
 # LATER: try to do a layered map to see if there's a corlleation between industrial area and water quality bweing bad
 
 # Load data
 df_sites = pd.read_csv('monitoringSite.csv')
-df_data22 = pd.read_csv('aggregateddata2022.csv')
+df_data22 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2022.csv')
 df_data22['year'] = 2022
-df_data21 = pd.read_csv('aggregateddata2021.csv')
+df_data21 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2021.csv')
 df_data21['year'] = 2021
-df_data20 = pd.read_csv('aggregateddata2020.csv')
+df_data20 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2020.csv')
 df_data20['year'] = 2020
-df_data19 = pd.read_csv('aggregateddata2019.csv')
+df_data19 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2019.csv')
 df_data19['year'] = 2019
 df_data = pd.concat([df_data19, df_data20, df_data21, df_data22])
 
@@ -80,6 +81,9 @@ app.layout = html.Div(
                     dbc.Row(
                         dcc.Graph(id='line_graph'),
                     ),
+                    dbc.Row(
+                        dcc.Graph(id='box_graph'),
+                    ),
                 ],),
             ]
         )
@@ -93,6 +97,10 @@ app.layout = html.Div(
 )
 def update_map(selected_element):
     filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
+    
+    # Calculate global min and max of hexagon averages
+    global_min = filtered_data['resultMeanValue'].min()
+    global_max = filtered_data['resultMeanValue'].max()
 
     fig = ff.create_hexbin_mapbox(
         data_frame=filtered_data,
@@ -108,7 +116,7 @@ def update_map(selected_element):
         color="resultMeanValue",
         agg_func=np.mean,
         color_continuous_scale="matter",
-        range_color=[filtered_data['resultMeanValue'].min(),32],
+        range_color=[global_min, global_max],
         animation_frame="year",
     )
     
@@ -139,6 +147,24 @@ def update_line_graph(selected_element):
     )
 
     return line_fig
+
+@app.callback(
+    Output('box_graph', 'figure'),
+    Input('element_filter', 'value')
+)
+def update_line_graph(selected_element):
+    filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
+    
+    box_fig = px.box(
+        filtered_data,
+        x='phenomenonTimeReferenceYear',
+        y='resultMeanValue',
+        color='phenomenonTimeReferenceYear',
+        title="Annual distribution",
+        labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'}
+    )
+
+    return box_fig
 
 if __name__ == '__main__':
     app.run(debug=True)

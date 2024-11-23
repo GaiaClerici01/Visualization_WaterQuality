@@ -11,13 +11,13 @@ import pandas as pd
 
 # Load data
 df_sites = pd.read_csv('monitoringSite.csv')
-df_data22 = pd.read_csv('aggregateddata2022.csv')
+df_data22 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2022.csv')
 df_data22['year'] = 2022
-df_data21 = pd.read_csv('aggregateddata2021.csv')
+df_data21 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2021.csv')
 df_data21['year'] = 2021
-df_data20 = pd.read_csv('aggregateddata2020.csv')
+df_data20 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2020.csv')
 df_data20['year'] = 2020
-df_data19 = pd.read_csv('aggregateddata2019.csv')
+df_data19 = pd.read_csv('./aggregatedDataPerYear/aggregateddata2019.csv')
 df_data19['year'] = 2019
 df_data = pd.concat([df_data19, df_data20, df_data21, df_data22])
 
