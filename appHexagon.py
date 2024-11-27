@@ -30,6 +30,8 @@ df_geo = pd.merge(df_sites, df_data, on='monitoringSiteIdentifier')
 # Extract unique indicators
 df_elements = df_geo[['eeaIndicator']].drop_duplicates()
 
+df_elementScore = pd.read_csv('elementScore.csv')
+
 # Create the Dash app
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
@@ -79,9 +81,6 @@ app.layout = html.Div(
                         )
                     ),
                     dbc.Row(
-                        dcc.Graph(id='line_graph'),
-                    ),
-                    dbc.Row(
                         dcc.Graph(id='box_graph'),
                     ),
                 ],),
@@ -93,11 +92,12 @@ app.layout = html.Div(
 # Callback to update the animated map
 @app.callback(
     Output('map_graph', 'figure'),
-    Input('element_filter', 'value')
+    Input('element_filter', 'value'),
 )
 def update_map(selected_element):
     filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
-    
+    element_score = int(df_elementScore.loc[df_elementScore['Element'] == selected_element, 'Score'].iloc[0])
+
     # Calculate global min and max of hexagon averages
     global_min = filtered_data['resultMeanValue'].min()
     global_max = filtered_data['resultMeanValue'].max()
@@ -108,7 +108,7 @@ def update_map(selected_element):
         lon="lon",
         nx_hexagon=20,  # Adjust based on your dataset
         opacity=0.5,
-        labels={"color": "Point Count"},
+        labels={"color": "Mean value"},
         min_count=1,
         show_original_data=True,
         original_data_marker=dict(size=2, opacity=0.3, color="blue"),
@@ -116,41 +116,26 @@ def update_map(selected_element):
         color="resultMeanValue",
         agg_func=np.mean,
         color_continuous_scale="matter",
-        range_color=[global_min, 50],
+        range_color=[global_min, element_score],
         animation_frame="year",
     )
+    ticks = np.arange(0, element_score + 1, 5).tolist()
+
+    # Replace the last tick label with '>element_score'
+    tick_labels = [str(tick) for tick in ticks]
+    tick_labels[-1] = f">{element_score}"
+
     fig.update_layout(
         height=600,
-        margin={"r": 0, "t": 2, "l": 8, "b": 2}  # Remove extra margins
+        margin={"r": 0, "t": 2, "l": 8, "b": 2} , # Remove extra margins
+        coloraxis_colorbar=dict(
+            title="Mean Value",
+            tickvals=ticks,      # Use the tick positions
+            ticktext=tick_labels # Use the custom labels
+        )
     )
     
     return fig
-
-# Callback per aggiornare il grafico temporale
-@app.callback(
-    Output('line_graph', 'figure'),
-    Input('element_filter', 'value')
-)
-def update_line_graph(selected_element):
-    filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
-    
-    line_fig = go.Figure()
-    filtered_data = filtered_data.groupby('phenomenonTimeReferenceYear')['resultMeanValue'].mean().reset_index()
-
-    line_fig.add_trace(go.Scatter(
-        x=filtered_data['phenomenonTimeReferenceYear'],
-        y=filtered_data['resultMeanValue'],
-        mode='lines+markers',
-        line=dict(color='blue')
-    ))
-
-    line_fig.update_layout(
-        title="Annual trend",
-        xaxis_title="Year",
-        yaxis_title="Value",
-    )
-
-    return line_fig
 
 @app.callback(
     Output('box_graph', 'figure'),
