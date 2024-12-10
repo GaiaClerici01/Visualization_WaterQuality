@@ -81,7 +81,8 @@ app.layout = html.Div(
                         )
                     ),
                     dbc.Row(
-                        dcc.Graph(id='box_graph'),
+                        #dcc.Graph(id='box_graph'),
+                        dcc.Graph(id='violin_graph'),
                     ),
                 ],),
             ]
@@ -137,6 +138,7 @@ def update_map(selected_element):
     
     return fig
 
+'''
 @app.callback(
     Output('box_graph', 'figure'),
     Input('element_filter', 'value')
@@ -154,6 +156,27 @@ def update_line_graph(selected_element):
     )
 
     return box_fig
+'''
+
+@app.callback(
+    Output('violin_graph', 'figure'),
+    Input('element_filter', 'value')
+)
+def update_violin_graph(selected_element):
+    filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
+    
+    violin_fig = px.violin(
+        filtered_data,
+        x='phenomenonTimeReferenceYear',
+        y='resultMeanValue',
+        color='phenomenonTimeReferenceYear',
+        box=True,
+        points="all",
+        title="Annual Distribution",
+        labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'},
+    )
+
+    return violin_fig
 
 if __name__ == '__main__':
     app.run(debug=True)
