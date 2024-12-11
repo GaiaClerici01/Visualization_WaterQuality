@@ -171,7 +171,7 @@ def update_violin_graph(selected_element):
         y='resultMeanValue',
         color='phenomenonTimeReferenceYear',
         box=True,
-        points="all",
+        points=False, #"outliers", "suspectedoutliers", "all"
         title="Annual Distribution",
         labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'},
     )
