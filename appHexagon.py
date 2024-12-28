@@ -90,19 +90,38 @@ app.layout = html.Div(
     ]
 )
 
-# Callback to update the animated map
 @app.callback(
     Output('map_graph', 'figure'),
     Input('element_filter', 'value'),
 )
 def update_map(selected_element):
     filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
-    element_score = int(df_elementScore.loc[df_elementScore['Element'] == selected_element, 'Score'].iloc[0])
+    element_score = float(df_elementScore.loc[df_elementScore['Element'] == selected_element, 'Score'].iloc[0])
 
-    # Calculate global min and max of hexagon averages
-    global_min = filtered_data['resultMeanValue'].min()
-    global_max = filtered_data['resultMeanValue'].max()
+    # Calculate the step size for 5 evenly spaced ticks between 0 and element_score
+    step = element_score / 5
 
+    # Create 5 ticks from 0 to element_score
+    ticks = [i * step for i in range(5)]  # Creates 5 values: [0, step, 2*step, 3*step, 4*step]
+
+    # Create labels for the ticks
+    tick_labels = [f"{tick:.1f}" for tick in ticks]  # Format tick labels to 1 decimal point
+    
+    # Add '>element_score' as the last label
+    tick_labels.append(f">{element_score:.1f}")  # Append '>element_score' as the last label
+
+    # Define color scale (default pastel colors)
+    color_scale = [
+        'rgb(100, 150, 255)',  # Light Blue (low values)
+        'rgb(180, 100, 255)',  # Soft Purple (medium values)
+        'rgb(255, 100, 100)'   # Soft Red (high values)
+    ]
+    
+    # Reverse the color scale if the selected element is "Secchi Depth"
+    if selected_element == 'Secchi depth':
+        color_scale = color_scale[::-1]  # Reverse the color scale
+
+    # Create the hexbin map
     fig = ff.create_hexbin_mapbox(
         data_frame=filtered_data,
         lat="lat",  # Ensure these column names match your dataset
@@ -116,27 +135,24 @@ def update_map(selected_element):
         mapbox_style="carto-positron",
         color="resultMeanValue",
         agg_func=np.mean,
-        color_continuous_scale="matter",
-        range_color=[global_min, element_score],
+        color_continuous_scale=color_scale,  # Apply reversed or normal color scale
+        range_color=[0, element_score],  # Set the color range from 0 to element_score
         animation_frame="year",
     )
-    ticks = np.arange(0, element_score + 1, 5).tolist()
 
-    # Replace the last tick label with '>element_score'
-    tick_labels = [str(tick) for tick in ticks]
-    tick_labels[-1] = f">{element_score}"
-
+    # Update the layout to add a custom colorbar
     fig.update_layout(
         height=600,
-        margin={"r": 0, "t": 2, "l": 8, "b": 2} , # Remove extra margins
+        margin={"r": 0, "t": 2, "l": 8, "b": 2},  # Remove extra margins
         coloraxis_colorbar=dict(
             title="Mean Value",
-            tickvals=ticks,      # Use the tick positions
-            ticktext=tick_labels # Use the custom labels
+            tickvals=ticks + [element_score],  # Include element_score as the final tick
+            ticktext=tick_labels,  # Use the custom labels (including '>element_score')
         )
     )
-    
+
     return fig
+
 
 '''
 @app.callback(
@@ -165,18 +181,63 @@ def update_line_graph(selected_element):
 def update_violin_graph(selected_element):
     filtered_data = df_geo[df_geo['eeaIndicator'] == selected_element]
     
+    # Get the element score (threshold value)
+    element_score = float(df_elementScore.loc[df_elementScore['Element'] == selected_element, 'Score'].iloc[0])
+    
+    # Define a set of blue shades (lighter to darker)
+    blue_shades = [
+        'rgb(173, 216, 230)',  # Light Blue
+        'rgb(100, 149, 237)',  # Cornflower Blue
+        'rgb(70, 130, 180)',   # Steel Blue
+        'rgb(0, 0, 205)'       # Medium Blue
+    ]
+    
+    # Create the violin plot with blue shades
     violin_fig = px.violin(
         filtered_data,
         x='phenomenonTimeReferenceYear',
         y='resultMeanValue',
-        color='phenomenonTimeReferenceYear',
+        color='phenomenonTimeReferenceYear',  # Color by year or other dimension
+        color_discrete_sequence=blue_shades,  # Apply custom blue shades
         box=True,
-        points=False, #"outliers", "suspectedoutliers", "all"
+        points="all",  # Show all points
         title="Annual Distribution",
         labels={'phenomenonTimeReferenceYear': 'Year', 'resultMeanValue': 'Value'},
     )
 
+    # Remove the color legend (since the x-axis already represents the years)
+    violin_fig.update_layout(
+        showlegend=False,  # Hide the legend
+        shapes=[dict(
+                type="line",
+                x0=0,
+                x1=1,
+                y0=element_score,
+                y1=element_score,
+                line=dict(
+                    color="black",  # Black line for the threshold
+                    width=2,
+                    dash="dash"
+                ),
+                xref="paper",  # Use paper coordinates for x-axis
+                yref="y"  # Use the y-axis for vertical positioning
+            )],
+        annotations=[dict(
+                x=1.10,  # Move text to the right of the plot
+                y=element_score,  # Position the text at the threshold line
+                xref="paper",  # Use paper coordinates for x-axis
+                yref="y",  # Use the y-axis for positioning vertically
+                text=f": {element_score}",
+                showarrow=False,
+                font=dict(size=12, color="red"),
+                align="left",
+                valign="bottom",
+            )]
+    )
+
     return violin_fig
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
