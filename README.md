@@ -1,4 +1,4 @@
-# Visualisation_WaterQuality
+# Visualization_WaterQuality
 ## Virtual Environment
 In order to use the requirements.txt. Create a virtual environment for python, specifically for the project. The venv will be created in the current folder:
 In terminal 
